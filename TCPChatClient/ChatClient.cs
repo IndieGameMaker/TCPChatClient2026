@@ -102,6 +102,18 @@ public class ChatClient : IDisposable
 
     #region 메시지 송신
 
+    public async Task SendMessageAsync(string message)
+    {
+        try
+        {
+            await _writer!.WriteLineAsync(message);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
     #endregion
     
     #region 리소스 해제
