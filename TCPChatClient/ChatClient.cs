@@ -23,6 +23,9 @@ public class ChatClient : IDisposable
     
     // 연결 여부 프로퍼티
     public bool IsConnected => _isConnected && !_isDisposed;
+
+    // Cancellation Token Source
+    private readonly CancellationTokenSource _cts = new();
     
     // 생성자
     public ChatClient(string serverIp, int serverPort)
@@ -73,10 +76,11 @@ public class ChatClient : IDisposable
     {
         try
         {
-            while (IsConnected)
+            // while (IsConnected)
+            while (!_cts.Token.IsCancellationRequested)
             {
                 // 한라인씩 읽기
-                string? message = await _reader!.ReadLineAsync();
+                string? message = await _reader!.ReadLineAsync(_cts.Token);
 
                 if (message == null)
                 {
@@ -88,10 +92,9 @@ public class ChatClient : IDisposable
                 Console.WriteLine(message);
             }
         }
-        catch (Exception e)
+        catch (OperationCanceledException e)
         {
-            Console.WriteLine(e);
-            throw;
+            Console.WriteLine("정상 종료");
         }
         finally
         {
@@ -119,6 +122,13 @@ public class ChatClient : IDisposable
     #region 리소스 해제
     public void Dispose()
     {
+        if (_isDisposed) return;
+        
+        _cts.Cancel();
+        
+        _isDisposed = true;
+        _isConnected = false;
+        
         _stream?.Dispose();
         _reader?.Dispose();
         _writer?.Dispose();
