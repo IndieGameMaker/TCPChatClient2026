@@ -67,6 +67,43 @@ public class ChatClient : IDisposable
     }
     #endregion
 
+    #region 메시지 수신
+
+    public async Task ReceiveMessageAsync()
+    {
+        try
+        {
+            while (IsConnected)
+            {
+                // 한라인씩 읽기
+                string? message = await _reader!.ReadLineAsync();
+
+                if (message == null)
+                {
+                    Console.WriteLine("서버와 연결이 종료되었습니다.");
+                    break;
+                }
+                
+                // 수신된 메시지 콘솔에 출력
+                Console.WriteLine(message);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            Dispose();
+        }
+    }
+    #endregion
+
+    #region 메시지 송신
+
+    #endregion
+    
     #region 리소스 해제
     public void Dispose()
     {
